@@ -174,6 +174,14 @@
     return null;
   };
 
+  // "Refresh" on the Available agents card
+  const inAgentsCard = b => {
+    for (let e = b, i = 0; e && i < 6; e = e.parentElement, i++) if (/available agents|no agents/i.test(e.innerText || '')) return true;
+    return false;
+  };
+  const refreshBtn = cfg => [...document.querySelectorAll(BTN + ', a')].filter(vis)
+    .find(b => txt(b).toLowerCase() === (cfg.refreshText || 'Refresh').toLowerCase() && inAgentsCard(b)) || null;
+
   const dropdownEl = (cfg, taught) => findTaught(taught.dropdown) || findText(cfg.triggerTexts, true);
   const optionEl = (cfg, taught) => findTaught(taught.option) || findText(cfg.optionTexts, false);
 
@@ -194,6 +202,7 @@
         url: location.href.slice(0, 100),
         run: run ? txt(run) : null,
         recover: (el => (el ? txt(el) : null))(recoverBtn(cfg)),
+        refresh: !!refreshBtn(cfg),
         call: call ? { enabled: !isDisabled(call) } : null,
         progress: m ? { done: +m[1], total: +m[2] } : null,
         custTotal: cm ? +cm[2] : null,
@@ -214,7 +223,8 @@
       const el = what === 'run' ? runBtn(cfg)
         : what === 'call' ? callBtn(cfg)
         : what === 'end' ? endCallBtn(cfg, taught)
-        : what === 'recover' ? recoverBtn(cfg) : null;
+        : what === 'recover' ? recoverBtn(cfg)
+        : what === 'refresh' ? refreshBtn(cfg) : null;
       if (!el || (what !== 'end' && isDisabled(el))) return { ok: false, msg: 'Button disappeared before it could be clicked' };
       const label = what === 'end' ? 'End call' : txt(el);
       fire(el);

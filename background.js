@@ -9,7 +9,8 @@ const DEFAULTS = {
   // failed call: only when the page shows one of these...
   failTexts: 'call was not saved, Call ended: failed',
   // ...click whichever of these is showing (checked in this order), then call again
-  recoverTexts: 'Discard audio, End without saving audio, Return to calls'
+  recoverTexts: 'Discard audio, End without saving audio, Return to calls',
+  refreshText: 'Refresh'
 };
 
 const TEACH_PROMPTS = {
@@ -66,6 +67,7 @@ async function look(tabId) {
     cfg, taught, prog, steps,
     runF: has('run'),
     recoverF: has('recover'),
+    refreshF: has('refresh'),
     readyF: has('ready'),
     uploading: !!has('uploading'),
     endF: has('endCall'),
@@ -129,6 +131,7 @@ async function nextStep(tabId) {
     confirmEnd = { tabId, until: Date.now() + 3000 };
     return toast(tabId, 'Can\'t see the steps on this item. Once the agent has finished, press again within 3 s to END CALL.', 'warn');
   }
+  if (!s.callF && s.refreshF && !s.endF && !s.prog && !s.steps) return done(await clickIn(tabId, s, s.refreshF.frameId, 'refresh'));
   if (s.prog) return toast(tabId, `Not your turn - waiting for the other side (${s.prog.done}/${s.prog.total} done)`, 'warn');
   if (s.steps) return toast(tabId, 'Not your turn - the other side is on a step', 'warn');
   return toast(tabId, 'Nothing to click right now (waiting for the call to connect?)', 'warn');
@@ -136,7 +139,7 @@ async function nextStep(tabId) {
 
 // ---------------- auto mode ----------------
 async function startAuto(tabId) {
-  Object.assign(auto, { on: true, tabId, phase: 'start', doneTicks: 0, noEndTicks: 0, lastActionAt: 0, inCallSince: 0, ranThisCall: false, lastBadge: '' });
+  Object.assign(auto, { on: true, tabId, phase: 'start', doneTicks: 0, noEndTicks: 0, lastActionAt: 0, inCallSince: 0, ranThisCall: false, noAgentSince: 0, lastRefresh: 0, lastBadge: '' });
   await chrome.storage.session.set({ auto: { on: true, tabId } });
   chrome.action.setBadgeText({ text: 'ON' });
   chrome.action.setBadgeBackgroundColor({ color: '#6639ba' });
@@ -261,9 +264,26 @@ async function tick() {
         auto.lastActionAt = now;
         auto.inCallSince = 0;
         auto.ranThisCall = false;
+        auto.noAgentSince = 0;
+        auto.lastRefresh = 0;
         await status(r.msg + ' - waiting for the agent to pick up', r.ok ? 'ok' : 'err');
         return schedule(2000);
       }
+    }
+
+    // 5b. no agent to call: click Refresh after 10 s, then every 5 s until a Call button shows up
+    if (!s.callF && s.refreshF && !s.endF && !s.readyF && !s.uploading &&
+        (auto.phase === 'start' || auto.phase === 'advanced' || (auto.phase === 'calling' && now - auto.lastActionAt > CALL_RETRY_MS))) {
+      if (!auto.noAgentSince) auto.noAgentSince = now;
+      const due = auto.lastRefresh ? auto.lastRefresh + 5000 : auto.noAgentSince + 10000;
+      if (now >= due) {
+        const r = await clickIn(tabId, s, s.refreshF.frameId, 'refresh');
+        auto.lastRefresh = now;
+        await status(r.msg + ' - no agent available yet');
+      } else {
+        await status(`No agent available - refreshing in ${Math.ceil((due - now) / 1000)}s`);
+      }
+      return schedule(TICK_MS);
     }
 
     // 6. waiting

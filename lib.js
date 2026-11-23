@@ -162,6 +162,18 @@
     return { count: cards.length, active, customer };
   };
 
+  // Failed call (audio not saved): the next recovery button to click, only while the page shows a failure text.
+  const recoverBtn = cfg => {
+    const body = (document.body ? document.body.innerText : '').toLowerCase();
+    if (!list(cfg.failTexts).some(t => body.includes(t.toLowerCase()))) return null;
+    const els = [...document.querySelectorAll(BTN + ', a')].filter(vis);
+    for (const want of list(cfg.recoverTexts)) {
+      const el = els.find(b => txt(b).toLowerCase() === want.toLowerCase() && !isDisabled(b));
+      if (el) return el;
+    }
+    return null;
+  };
+
   const dropdownEl = (cfg, taught) => findTaught(taught.dropdown) || findText(cfg.triggerTexts, true);
   const optionEl = (cfg, taught) => findTaught(taught.option) || findText(cfg.optionTexts, false);
 
@@ -181,6 +193,7 @@
       return {
         url: location.href.slice(0, 100),
         run: run ? txt(run) : null,
+        recover: (el => (el ? txt(el) : null))(recoverBtn(cfg)),
         call: call ? { enabled: !isDisabled(call) } : null,
         progress: m ? { done: +m[1], total: +m[2] } : null,
         custTotal: cm ? +cm[2] : null,
@@ -200,7 +213,8 @@
     click(cfg, taught, what) {
       const el = what === 'run' ? runBtn(cfg)
         : what === 'call' ? callBtn(cfg)
-        : what === 'end' ? endCallBtn(cfg, taught) : null;
+        : what === 'end' ? endCallBtn(cfg, taught)
+        : what === 'recover' ? recoverBtn(cfg) : null;
       if (!el || (what !== 'end' && isDisabled(el))) return { ok: false, msg: 'Button disappeared before it could be clicked' };
       const label = what === 'end' ? 'End call' : txt(el);
       fire(el);

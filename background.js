@@ -5,7 +5,11 @@ const DEFAULTS = {
   optionTexts: 'StartTranscription',
   uploadingTexts: 'Sending the agent recording, Collecting the agent',
   readyTexts: 'ready for transcription',
-  noStepSeconds: '10'
+  noStepSeconds: '10',
+  // failed call: only when the page shows one of these...
+  failTexts: 'call was not saved, Call ended: failed',
+  // ...click whichever of these is showing (checked in this order), then call again
+  recoverTexts: 'Discard audio, End without saving audio, Return to calls'
 };
 
 const TEACH_PROMPTS = {
@@ -61,6 +65,7 @@ async function look(tabId) {
   const out = {
     cfg, taught, prog, steps,
     runF: has('run'),
+    recoverF: has('recover'),
     readyF: has('ready'),
     uploading: !!has('uploading'),
     endF: has('endCall'),
@@ -104,6 +109,7 @@ async function nextStep(tabId) {
   const s = await look(tabId);
   const done = r => toast(tabId, r.msg, r.ok ? 'ok' : 'err');
 
+  if (s.recoverF) return done(await clickIn(tabId, s, s.recoverF.frameId, 'recover'));
   if (s.runF) return done(await clickIn(tabId, s, s.runF.frameId, 'run'));
   if (s.readyF) {
     if (!s.advF) return toast(tabId, 'Upload finished, but the status dropdown was not found. Use "Teach status change" in the popup.', 'err');
@@ -173,6 +179,14 @@ async function tick() {
     const fail = msg => stopAuto(msg, 'err');
     // remember when this call connected (End call button appeared)
     if (s.endF && !auto.inCallSince && auto.phase !== 'ended' && auto.phase !== 'advanced') auto.inCallSince = now;
+
+    // 0. failed call (audio not saved): end without saving, discard, return to calls, then call again
+    if (s.recoverF) {
+      const r = await clickIn(tabId, s, s.recoverF.frameId, 'recover');
+      Object.assign(auto, { phase: 'start', inCallSince: 0, ranThisCall: false, doneTicks: 0 });
+      await status(r.msg + ' (call failed - redoing it)', r.ok ? 'ok' : 'err');
+      return schedule(1500);
+    }
 
     // 1. my turn
     if (s.runF) {

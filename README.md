@@ -16,6 +16,7 @@ Already have the extension? Open its popup and click **Turn on one-click updates
 - **Alt+Q**: do the next step. **Alt+W**: start / stop auto mode.
 - Buttons are already mapped for everyone. If one isn't found, teach it under **Advanced** in the popup.
 - Calls where you have no steps end automatically after the seconds set in the popup (default 10).
+- If a call fails and its audio can't be saved, it ends it without saving, discards the audio, returns to calls and calls again.
 - When an update is out, the extension icon shows **NEW**: open the popup and click **Update now**.
 
 ## For the maintainer

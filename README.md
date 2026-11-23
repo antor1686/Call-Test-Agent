@@ -14,9 +14,10 @@ Already have the extension? Open its popup and click **Turn on one-click updates
 
 ## Use
 - **Alt+Q**: do the next step. **Alt+W**: start / stop auto mode.
+- Buttons are already mapped for everyone. If one isn't found, teach it under **Advanced** in the popup.
 - Calls where you have no steps end automatically after the seconds set in the popup (default 10).
 - When an update is out, the extension icon shows **NEW**: open the popup and click **Update now**.
 
 ## For the maintainer
-- **Share taught buttons:** teach them in the popup on the real page, click **Share with everyone** (writes `mappings.json`), then push. Users get them with the update; anyone who taught their own keeps theirs.
+- **Share taught buttons:** teach them under **Advanced** in the popup on the real page, click **Share with everyone** (writes `mappings.json`), then push. Users get them with the update; anyone who taught their own keeps theirs.
 - **Ship an update:** change the code, **raise `version` in `manifest.json`**, and push to `main`.

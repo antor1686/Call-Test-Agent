@@ -358,3 +358,33 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
     })();
   }
 });
+
+// ---------------- Key Mapper link: publish the current item ----------------
+// The agent's Key Mapper extension reads this topic and switches to the same item when idle.
+// Only the item name is sent, to https://ntfy.sh/<kmTopic>. Empty topic = off.
+const lastCast = new Map(); // tabId -> last successful { topic, item, at }
+const castPending = new Set();
+const CAST_REFRESH_MS = 60000;
+chrome.tabs.onRemoved.addListener(tabId => { lastCast.delete(tabId); });
+chrome.runtime.onMessage.addListener((msg, sender) => {
+  if (msg.type !== 'itemcast' || !sender.tab ||
+      typeof msg.item !== 'string' || !/^[a-z0-9]+(?:_[a-z0-9]+)*__[a-z0-9_]+$/i.test(msg.item)) return;
+  const tabId = sender.tab.id;
+  if (castPending.has(tabId)) return;
+  castPending.add(tabId);
+  (async () => {
+    const { kmTopic } = await chrome.storage.sync.get({ kmTopic: '' });
+    if (!kmTopic) return;
+    const previous = lastCast.get(tabId);
+    if (previous && previous.topic === kmTopic && previous.item === msg.item &&
+        Date.now() - previous.at < CAST_REFRESH_MS) return;
+    const response = await fetch('https://ntfy.sh/' + encodeURIComponent(kmTopic), {
+      method: 'POST',
+      body: JSON.stringify({ v: 1, item: msg.item, company: msg.item.split('__')[0], t: Date.now() }),
+      signal: AbortSignal.timeout(10000)
+    });
+    if (!response.ok) throw new Error('Item broadcast HTTP ' + response.status);
+    lastCast.set(tabId, { topic: kmTopic, item: msg.item, at: Date.now() });
+  })().catch(() => { /* Next content heartbeat retries; never log the private topic. */ })
+    .finally(() => castPending.delete(tabId));
+});

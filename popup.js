@@ -70,6 +70,8 @@ $('auto').onclick = async () => {
 $('shortcuts').onclick = e => { e.preventDefault(); chrome.tabs.create({ url: 'chrome://extensions/shortcuts' }); };
 
 $('noStepSeconds').onchange = () => chrome.storage.sync.set({ noStepSeconds: $('noStepSeconds').value });
+chrome.storage.sync.get({ kmTopic: '' }).then(c => { $('kmTopic').value = c.kmTopic; });
+$('kmTopic').onchange = () => chrome.storage.sync.set({ kmTopic: $('kmTopic').value.trim() });
 
 $('save').onclick = async () => {
   await chrome.storage.sync.set(readCfg());

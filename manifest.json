@@ -1,0 +1,20 @@
+{
+  "manifest_version": 3,
+  "name": "Call Test Agent",
+  "version": "1.3.0",
+  "description": "One hotkey does the next available step: Call -> Run <tool> buttons -> status dropdown to the next item.",
+  "permissions": ["scripting", "storage", "activeTab", "alarms", "nativeMessaging"],
+  "host_permissions": ["<all_urls>"],
+  "background": { "service_worker": "background.js" },
+  "action": { "default_popup": "popup.html", "default_title": "Call Test Agent" },
+  "commands": {
+    "next-step": {
+      "suggested_key": { "default": "Alt+Q" },
+      "description": "Do the next available step"
+    },
+    "toggle-auto": {
+      "suggested_key": { "default": "Alt+W" },
+      "description": "Start / stop auto mode"
+    }
+  }
+}

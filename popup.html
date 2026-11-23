@@ -1,0 +1,71 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+  body { width: 360px; font: 13px system-ui, sans-serif; margin: 12px; color: #1f2328; }
+  h1 { font-size: 15px; margin: 0 0 4px; }
+  h2 { font-size: 13px; margin: 14px 0 4px; }
+  p { margin: 0 0 8px; color: #57606a; }
+  label { display: block; font-weight: 600; margin-top: 8px; }
+  input { width: 100%; box-sizing: border-box; padding: 5px 6px; margin-top: 3px; }
+  small { color: #57606a; }
+  .row { display: flex; gap: 6px; margin-top: 8px; }
+  button { flex: 1; padding: 6px; cursor: pointer; }
+  .teach button { background: #0969da; color: #fff; border: 0; border-radius: 4px; }
+  .learned { font-size: 12px; margin-top: 4px; }
+  .yes { color: #1a7f37; } .no { color: #9a6700; }
+  details { margin-top: 12px; }
+  pre { background: #f6f8fa; padding: 6px; max-height: 220px; overflow: auto; font-size: 11px; white-space: pre-wrap; }
+  #saved { color: #1a7f37; }
+  .autobtn { background: #6639ba; color: #fff; border: 0; border-radius: 4px; padding: 9px; font-weight: 600; }
+  .autobtn.on { background: #cf222e; }
+</style>
+</head>
+<body>
+  <h1>Call Test Agent</h1>
+  <p>Next step: <b id="key">…</b> &middot; Auto on/off: <b id="keyAuto">…</b> &middot; <a href="#" id="shortcuts">change</a></p>
+
+  <div class="row"><button id="auto" class="autobtn">Start auto mode</button></div>
+  <label>Calls with no steps: end the call after (seconds)
+    <input id="noStepSeconds" type="number" min="0" step="5"></label>
+  <small>Counted from when the call connects. Saved automatically.</small>
+
+  <h2>Teach (do once, on the real page)</h2>
+  <p>Click a button below, then click the real elements on the page. The popup closes; follow the blue message in the page corner.</p>
+  <div class="row teach">
+    <button id="teachStatus">Teach status change (2 clicks)</button>
+    <button id="teachEnd">Teach End call (1 click)</button>
+  </div>
+  <div class="learned">Status dropdown: <span id="l_dropdown"></span> &middot; Option: <span id="l_option"></span> &middot; End call: <span id="l_endcall"></span></div>
+  <div class="row"><button id="forget">Forget my taught buttons</button><button id="share">Share with everyone</button></div>
+  <div id="shareMsg" class="learned"></div>
+
+  <details>
+    <summary>Text settings</summary>
+    <label>Run-button prefix <input id="runPrefix"></label>
+    <label>Call button text <input id="callText"></label>
+    <label>Status dropdown text (fallback) <input id="triggerTexts"></label>
+    <label>Status option text (fallback) <input id="optionTexts"></label>
+    <label>"Uploading" texts <input id="uploadingTexts"></label>
+    <label>"Upload finished" texts <input id="readyTexts"></label>
+    <small>Several texts allowed, comma-separated.</small>
+    <div class="row"><button id="save">Save</button></div>
+    <div id="saved"></div>
+  </details>
+
+  <h2>Updates</h2>
+  <p>Version <b id="ver"></b> &middot; Your extension ID: <code id="extId"></code> <a href="#" id="copyId">copy</a></p>
+  <div class="row"><button id="update">Check for updates</button></div>
+  <div id="updMsg" class="learned"></div>
+  <div id="setupBox" hidden>
+    <div class="row"><button id="copySetup" class="autobtn">Turn on one-click updates (one time)</button></div>
+    <small id="setupHint">Copies a command. Then press <b>Win + R</b>, <b>Ctrl + V</b>, <b>Enter</b>.</small>
+  </div>
+
+  <div class="row"><button id="scan">Test: what do you see?</button></div>
+  <pre id="out" hidden></pre>
+
+  <script src="popup.js"></script>
+</body>
+</html>

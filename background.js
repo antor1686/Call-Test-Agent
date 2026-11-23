@@ -358,3 +358,21 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
     })();
   }
 });
+
+// ---------------- Key Mapper link: publish the current item ----------------
+// The agent's Key Mapper extension reads this topic and switches to the same item when idle.
+// Only the item name is sent, to https://ntfy.sh/<kmTopic>. Empty topic = off.
+const lastCast = {}; // tabId -> item already published
+chrome.runtime.onMessage.addListener((msg, sender) => {
+  if (msg.type !== 'itemcast' || !sender.tab) return;
+  const tabId = sender.tab.id;
+  if (lastCast[tabId] === msg.item) return;
+  chrome.storage.sync.get({ kmTopic: '' }).then(({ kmTopic }) => {
+    if (!kmTopic) return;
+    lastCast[tabId] = msg.item;
+    fetch('https://ntfy.sh/' + encodeURIComponent(kmTopic), {
+      method: 'POST',
+      body: JSON.stringify({ v: 1, item: msg.item, company: msg.item.split('__')[0], t: Date.now() })
+    }).catch(() => { delete lastCast[tabId]; });
+  });
+});

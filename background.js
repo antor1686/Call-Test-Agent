@@ -329,6 +329,7 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
   }
   if (msg.type === 'taught' && teach && sender.tab && sender.tab.id === teach.tabId) {
     const slot = teach.slots.shift();
+    if (!slot) return;
     (async () => {
       const taught = await getLocalTaught();
       taught[slot] = msg.desc;

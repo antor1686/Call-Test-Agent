@@ -31,7 +31,12 @@ async function showLearned() {
 // so they ship to everyone with the next push + update.
 $('share').onclick = async () => {
   const { taught } = await chrome.storage.local.get({ taught: {} });
-  const all = { ...(await getShared()), ...taught };
+  const all = {};
+  for (const [slot, d] of Object.entries({ ...(await getShared()), ...taught })) {
+    if (!['dropdown', 'option', 'endcall'].includes(slot)) continue;
+    const { frame, path, ...rest } = d; // keep site addresses and page structure out of the public file
+    all[slot] = rest;
+  }
   if (!Object.keys(all).length) return ($('shareMsg').textContent = 'Nothing taught yet.');
   try {
     const r = await chrome.runtime.sendNativeMessage('com.calltestagent.updater', { cmd: 'save-mappings', data: all });

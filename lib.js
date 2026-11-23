@@ -76,8 +76,7 @@
     id: el.id || '',
     role: el.getAttribute('role') || '',
     cls: goodClasses(el),
-    path: cssPath(el),
-    frame: location.origin + location.pathname
+    path: cssPath(el)
   });
 
   const findTaught = d => {

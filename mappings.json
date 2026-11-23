@@ -1,1 +1,46 @@
-{}
+{
+  "dropdown": {
+    "aria": "",
+    "cls": [
+      "sn-button-gray",
+      "sn-button-small",
+      "sn-button",
+      "sn-button-has-icon",
+      "dropdown-menu-trigger"
+    ],
+    "id": "",
+    "role": "",
+    "tag": "button",
+    "testid": "",
+    "text": "CustomerInCall",
+    "title": ""
+  },
+  "endcall": {
+    "aria": "End current call",
+    "cls": [
+      "round-button",
+      "danger-button",
+      "hangup-button"
+    ],
+    "id": "",
+    "role": "",
+    "tag": "button",
+    "testid": "",
+    "text": "",
+    "title": ""
+  },
+  "option": {
+    "aria": "",
+    "cls": [
+      "sn-chip-gray",
+      "sn-chip-medium",
+      "sn-chip"
+    ],
+    "id": "",
+    "role": "",
+    "tag": "sn-chip",
+    "testid": "",
+    "text": "ReadyForTranscription",
+    "title": ""
+  }
+}

@@ -1,9 +1,12 @@
 // Item broadcast for Key Mapper (agent side): tells background.js which item this tab is on,
 // so it can publish it to the shared ntfy topic. Read-only: never clicks anything.
 (() => {
-  const SA = /superannotate\.com/i;
+  const isSA = (url) => {
+    try { const host = new URL(url).hostname; return host === 'superannotate.com' || host.endsWith('.superannotate.com'); }
+    catch (_) { return false; }
+  };
   const anc = Array.from(location.ancestorOrigins || []);
-  if (!SA.test(location.href) && !anc.some(o => SA.test(o))) return;
+  if (!isSA(location.href) && !anc.some(isSA)) return;
 
   const ITEM_RE = /\b[a-z0-9]+(?:_[a-z0-9]+)*__[a-z0-9]+(?:_[a-z0-9]+)*\b/gi;
   function detectItem() {
@@ -18,11 +21,9 @@
     return best;
   }
 
-  let last = null;
   setInterval(() => {
     const item = detectItem();
-    if (!item || item === last) return;
-    last = item;
+    if (!item) return; // background deduplicates; repeat so failures and topic changes recover
     try { chrome.runtime.sendMessage({ type: 'itemcast', item }).catch(() => {}); } catch (e) { /* reloaded */ }
   }, 3000);
 })();

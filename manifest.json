@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Call Test Agent",
-  "version": "1.4.0",
+  "version": "1.4.1",
   "description": "One hotkey does the next available step: Call -> Run <tool> buttons -> status dropdown to the next item.",
   "permissions": ["scripting", "storage", "activeTab", "alarms", "nativeMessaging"],
   "host_permissions": ["<all_urls>"],
